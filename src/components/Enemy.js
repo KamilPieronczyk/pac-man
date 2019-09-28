@@ -4,9 +4,9 @@ import config from '../config/gameConfig'
 
 export default memo((props) => {
   const directions = ['left', 'right', 'up', 'down']
-  let direction = ''
   const [top, setTop] = useState(Math.floor((Math.random() * 690) / 30)*30)
   const [left, setLeft] = useState(Math.floor((Math.random() * 1170) / 30)*30)
+  let direction = ''
   let lTop = top
   let lLeft = left
   const {height, width, PacManSize} = config
@@ -15,6 +15,8 @@ export default memo((props) => {
     props.subscribe(()=>{
       move()
       borderCollisionDetect()
+      props.pos[0] = lTop
+      props.pos[1] = lLeft
     })
     changeDirection()
   },[direction])

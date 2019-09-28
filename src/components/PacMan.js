@@ -17,11 +17,14 @@ export default function PacMan(props) {
     props.register(()=>{
       borderCollisionDetect()
       move()
+      props.pos[0] = lTop
+      props.pos[1] = lLeft
     })
     return () => {
+      props.unregister()
       document.removeEventListener('keydown', keydown)
     }
-  })
+  },[])
 
   const rotate = () => {
     switch(direction){
