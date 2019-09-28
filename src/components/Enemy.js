@@ -25,7 +25,6 @@ export default memo((props) => {
 
   const changeDirection = () => {
     direction = randomDirection()
-    console.log(direction)
     setTimeout(() => {
       changeDirection()
     }, Math.floor(Math.random()*10000));
