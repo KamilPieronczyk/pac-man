@@ -6,7 +6,7 @@ export default function PacMan(props) {
   const [deg, setDeg] = useState(0)
   const [top, setTop] = useState(0)
   const [left, setLeft] = useState(0)
-  let direction = 'right'
+  let direction = ''
   let prevKey = 0
   let lTop = top
   let lLeft = left
@@ -14,6 +14,16 @@ export default function PacMan(props) {
 
   useEffect(()=>{
     document.addEventListener('keydown', keydown)
+    props.register(()=>{
+      borderCollisionDetect()
+      move()
+    })
+    return () => {
+      document.removeEventListener('keydown', keydown)
+    }
+  })
+
+  const rotate = () => {
     switch(direction){
       case 'right': setDeg(0); break;
       case 'left': setDeg(180);break;
@@ -21,15 +31,7 @@ export default function PacMan(props) {
       case 'down': setDeg(90);break;
       default: break;
     }
-    console.log('deg')
-    props.subscribe(()=>{
-      borderCollisionDetect()
-      move()
-    })
-    return () => {
-      document.removeEventListener('keydown', keydown)
-    }
-  },[direction])
+  }
 
   const keydown = (event) => {
     if(prevKey === event.keyCode) return;
@@ -41,6 +43,7 @@ export default function PacMan(props) {
       case 32: direction = null; break
       default: break;
     }
+    rotate()
     prevKey = event.keyCode
   }
 
@@ -55,11 +58,13 @@ export default function PacMan(props) {
   }
 
   const borderCollisionDetect = () => {
+    let prev = direction
     if(lTop < 0) direction = 'down'
     if(lLeft < 0) direction = 'right'
     if(height-PacManSize <= lTop) direction = 'up'
     if(width-PacManSize <= lLeft) direction = 'left'
     prevKey=0
+    if (prev !== direction) rotate()
   }
 
   return (

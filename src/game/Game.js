@@ -9,10 +9,12 @@ export default function Game() {
   const [dotsArray, setDotsArray] = useState(Array(24*40).fill(true))
   const [dotsCount, setDotsCount] = useState(0)
   let callbacks = []
+  let pacmanCallback = ()=>{}
 
   useEffect(()=>{
     const interval = setInterval(() => {
       callbacks.forEach(fun => fun())
+      pacmanCallback()
       //dotsEatenDetect()
     }, 1000/60);
     return () => {
@@ -39,9 +41,13 @@ export default function Game() {
     callbacks.push(callback)
   }
 
+  function registerPacMan(callback){
+    pacmanCallback = callback
+  }
+
   return (
     <Container>
-      <PacMan subscribe={subscribe} />
+      <PacMan register={registerPacMan} />
       <DotsTable dots={dotsArray} count={dotsCount} />
       <Enemy color="red" subscribe={subscribe} />
       <Enemy color="orange" subscribe={subscribe} />
