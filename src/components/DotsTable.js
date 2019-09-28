@@ -10,7 +10,6 @@ export default memo((props) => {
     }
     return table
   }
-  console.log('table rendered')
   return (
     <Container>
       {createDots()}

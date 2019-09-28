@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import PacMan from '../components/PacMan'
 import DotsTable from '../components/DotsTable'
 import config from '../config/gameConfig'
+import Enemy from '../components/Enemy'
 
 export default function Game() {
   const [top, setTop] = useState(0)
@@ -14,10 +15,12 @@ export default function Game() {
   let lTop = top
   let lLeft = left
   const {speed, height, width, PacManSize} = config
+  let callbacks = []
 
   useEffect(()=>{
     document.addEventListener('keydown', keydown)
     const interval = setInterval(() => {
+      callbacks.forEach(fun => fun())
       borderCollisionDetect()
       dotsEatenDetect()
       move()
@@ -64,7 +67,6 @@ export default function Game() {
     let dotCol = Math.floor((lLeft + 15) / 30)
     let dotBox = dotRow * 40 + dotCol
     if(dotsArray[dotBox]){
-      console.log(lTop-(dotRow * 30), lLeft - (dotCol * 30), lTop, dotRow, lLeft, dotCol)
       if(lTop-(dotRow * 30) < 8 && lLeft - (dotCol * 30) < 12){
         setDotsArray(array => {
           array[dotBox] = false
@@ -75,10 +77,19 @@ export default function Game() {
     }
   }
 
+  function subscribe (callback) {
+    callbacks.push(callback)
+  }
+
   return (
     <Container>
       <PacMan top={top} left={left} direction={direction} />
       <DotsTable dots={dotsArray} count={dotsCount} />
+      <Enemy color="red" subscribe={subscribe} />
+      <Enemy color="orange" subscribe={subscribe} />
+      <Enemy color="green" subscribe={subscribe} />
+      <Enemy color="blue" subscribe={subscribe} />
+      <Enemy color="white" subscribe={subscribe} />
     </Container>
   )
 }
