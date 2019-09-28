@@ -2,23 +2,24 @@ import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
 import PacMan from '../components/PacMan'
 import DotsTable from '../components/DotsTable'
+import config from '../config/gameConfig'
 
 export default function Game() {
   const [top, setTop] = useState(0)
   const [left, setLeft] = useState(0)
   const [direction, setDirection] = useState('')
+  const [dotsArray, setDotsArray] = useState(Array(24*40).fill(true))
+  const [dotsCount, setDotsCount] = useState(0)
   let prevKey = 0
   let lTop = top
   let lLeft = left
-  const speed = 2
-  const height = 720
-  const width = 1200
-  const PacManSize = 30
+  const {speed, height, width, PacManSize} = config
 
   useEffect(()=>{
-    const listener = document.addEventListener('keydown', keydown)
+    document.addEventListener('keydown', keydown)
     const interval = setInterval(() => {
       borderCollisionDetect()
+      dotsEatenDetect()
       move()
     }, 1000/60);
     return () => {
@@ -28,7 +29,7 @@ export default function Game() {
   },[direction])
 
   const keydown = (event) => {
-    if(prevKey == event.keyCode) return;
+    if(prevKey === event.keyCode) return;
     switch(event.keyCode){
       case 37: setDirection('left'); break
       case 38: setDirection('up'); break
@@ -57,12 +58,27 @@ export default function Game() {
     if(width-PacManSize <= lLeft) setDirection('left')
     prevKey=0
   }
-  console.log('container rendered');
+
+  const dotsEatenDetect = () => {
+    let dotRow = Math.floor((lTop + 15) / 30)
+    let dotCol = Math.floor((lLeft + 15) / 30)
+    let dotBox = dotRow * 40 + dotCol
+    if(dotsArray[dotBox]){
+      console.log(lTop-(dotRow * 30), lLeft - (dotCol * 30), lTop, dotRow, lLeft, dotCol)
+      if(lTop-(dotRow * 30) < 8 && lLeft - (dotCol * 30) < 12){
+        setDotsArray(array => {
+          array[dotBox] = false
+          return array
+        })
+        setDotsCount(dotsCount => dotsCount + 1)
+      }
+    }
+  }
 
   return (
     <Container>
       <PacMan top={top} left={left} direction={direction} />
-      <DotsTable />
+      <DotsTable dots={dotsArray} count={dotsCount} />
     </Container>
   )
 }

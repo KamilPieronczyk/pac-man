@@ -1,13 +1,13 @@
-import React, {useState} from 'react'
+import React, {memo} from 'react'
 import styled from 'styled-components'
 
-export default function Dot() {
+export default memo((props) => {
   return (
     <Container width={30} height={30}>
-      <_Dot />
+      {props.visible ? <_Dot /> : null}
     </Container>
   )
-}
+})
 
 const Container = styled.div`
   width: 100%;

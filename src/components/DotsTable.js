@@ -2,11 +2,11 @@ import React, {memo} from 'react'
 import styled from 'styled-components'
 import Dot from './Dot'
 
-export default memo(() => {
+export default memo((props) => {
   const table = []
   const createDots = () => {
     for (let i = 0; i < 24*40; i++) {
-      table.push(<Dot />)
+      table.push(<Dot visible={props.dots[i]} />)
     }
     return table
   }
@@ -16,6 +16,8 @@ export default memo(() => {
       {createDots()}
     </Container>
   )
+}, (prevProps, nextProps) => {
+  return prevProps.count === nextProps.count
 })
 
 const Container = styled.div`
