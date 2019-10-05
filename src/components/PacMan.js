@@ -1,30 +1,35 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useCallback} from 'react'
 import styled, {keyframes} from 'styled-components'
 import config from '../config/gameConfig'
+import {useObjects, useOnFrameReload} from '../hooks'
 
 export default function PacMan(props) {
   const [deg, setDeg] = useState(0)
   const [top, setTop] = useState(0)
   const [left, setLeft] = useState(0)
-  let direction = ''
+  const [direction, setDirection] = useState('')
+  const objects = useObjects('PacMan')
   let prevKey = 0
-  let lTop = top
-  let lLeft = left
   const {speed, height, width, PacManSize} = config
 
   useEffect(()=>{
+    let pacMan = objects.getObject('PacMan')
+    pacMan.height = 30
+    pacMan.weight = 30
     document.addEventListener('keydown', keydown)
-    props.register(()=>{
-      borderCollisionDetect()
-      move()
-      props.pos[0] = lTop
-      props.pos[1] = lLeft
-    })
     return () => {
-      props.unregister()
       document.removeEventListener('keydown', keydown)
     }
   },[])
+
+  useEffect(()=>{
+    rotate()
+  },[direction])
+
+  useOnFrameReload(()=>{
+    move()
+    borderCollisionDetect()
+  })
 
   const rotate = () => {
     switch(direction){
@@ -39,36 +44,33 @@ export default function PacMan(props) {
   const keydown = (event) => {
     if(prevKey === event.keyCode) return;
     switch(event.keyCode){
-      case 37: direction = 'left'; break
-      case 38: direction = 'up'; break
-      case 39: direction = 'right'; break
-      case 40: direction = 'down'; break
-      case 32: direction = null; break
+      case 37: setDirection('left'); break
+      case 38: setDirection('up'); break
+      case 39: setDirection('right'); break
+      case 40: setDirection('down'); break
+      case 32: setDirection(null); break
       default: break;
     }
-    rotate()
     prevKey = event.keyCode
   }
 
-  const move = () => {
+  const move = useCallback(() => {
     switch(direction){
-      case 'left': setLeft(left => left-speed); lLeft = lLeft - speed; break;
-      case 'right': setLeft(right => right+speed); lLeft = lLeft + speed; break;
-      case 'up': setTop(top=>top-speed); lTop = lTop - speed; break;
-      case 'down': setTop(top=>top+speed); lTop = lTop + speed; break;
+      case 'left': setLeft(left => left-speed); objects.getObject('PacMan').left = left; break;
+      case 'right': setLeft(right => right+speed); objects.getObject('PacMan').left = left; break;
+      case 'up': setTop(top=>top-speed); objects.getObject('PacMan').top = top; break;
+      case 'down': setTop(top=>top+speed); objects.getObject('PacMan').top = top; break;
       default: break
     }
-  }
+  },[top, left, direction])
 
-  const borderCollisionDetect = () => {
-    let prev = direction
-    if(lTop < 0) direction = 'down'
-    if(lLeft < 0) direction = 'right'
-    if(height-PacManSize <= lTop) direction = 'up'
-    if(width-PacManSize <= lLeft) direction = 'left'
+  const borderCollisionDetect = useCallback(() => {
+    if(top < 0) setDirection('down')
+    if(left < 0) setDirection('right')
+    if(height-PacManSize <= top) setDirection('up')
+    if(width-PacManSize <= left) setDirection('left')
     prevKey=0
-    if (prev !== direction) rotate()
-  }
+  },[top,left])
 
   return (
     <Container {...props} deg={deg} style={{top, left}}>

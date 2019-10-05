@@ -1,53 +1,54 @@
-import React, {memo, useState,useEffect} from 'react'
+import React, {memo, useState,useEffect, useCallback} from 'react'
+import {useObjects, useOnFrameReload} from '../hooks'
 import styled from 'styled-components'
 import config from '../config/gameConfig'
 
 export default memo((props) => {
   const directions = ['left', 'right', 'up', 'down']
+  const name = 'Ghost' + props.id
+  const objects = useObjects(name, 'Ghosts')
   const [top, setTop] = useState(Math.floor((Math.random() * 690) / 30)*30)
   const [left, setLeft] = useState(Math.floor((Math.random() * 1170) / 30)*30)
-  let direction = ''
-  let lTop = top
-  let lLeft = left
+  const [direction, setDirection] = useState('')
   const {height, width, PacManSize} = config
   const speed = 3
+
   useEffect(()=>{
-    props.subscribe(()=>{
-      move()
-      borderCollisionDetect()
-      props.pos[0] = lTop
-      props.pos[1] = lLeft
-    })
     changeDirection()
-  },[direction])
+  },[])
+
+  useOnFrameReload(()=>{
+    move()
+    borderCollisionDetect()
+  })
 
   const randomDirection = () => {
     return directions[Math.floor(Math.random()*4-0.01)]
   }
 
   const changeDirection = () => {
-    direction = randomDirection()
+    setDirection(randomDirection())
     setTimeout(() => {
       changeDirection()
     }, Math.floor(Math.random()*10000));
   }
 
-  const move = () => {
+  const move = useCallback(() => {
     switch(direction){
-      case 'left': setLeft(left => left-speed); lLeft = lLeft - speed; break;
-      case 'right': setLeft(right => right+speed); lLeft = lLeft + speed; break;
-      case 'up': setTop(top=>top-speed); lTop = lTop - speed; break;
-      case 'down': setTop(top=>top+speed); lTop = lTop + speed; break;
+      case 'left': setLeft(left => left-speed); objects.getObject(name, 'Ghosts').left = left; break;
+      case 'right': setLeft(right => right+speed); objects.getObject(name, 'Ghosts').left = left; break;
+      case 'up': setTop(top=>top-speed); objects.getObject(name, 'Ghosts').top = top; break;
+      case 'down': setTop(top=>top+speed); objects.getObject(name, 'Ghosts').top = top; break;
       default: break
     }
-  }
+  },[top,left,direction])
 
-  const borderCollisionDetect = () => {
-    if(lTop < 0) direction = 'down'
-    if(lLeft < 0) direction = 'right'
-    if(height-PacManSize <= lTop) direction = 'up'
-    if(width-PacManSize <= lLeft) direction = 'left'
-  }
+  const borderCollisionDetect = useCallback(() => {
+    if(top < 0) setDirection('down')
+    if(left < 0) setDirection('right')
+    if(height-PacManSize <= top) setDirection('up')
+    if(width-PacManSize <= left) setDirection('left')
+  },[top, left])
 
   return (
     <Container style={{top, left}} color={props.color} />

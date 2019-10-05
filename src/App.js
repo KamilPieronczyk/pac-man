@@ -1,11 +1,14 @@
 import React from 'react';
 import styled from 'styled-components'
 import Game from './game/Game'
+import GameEngine from './game/GameEngine'
 
 function App() {
   return (
     <Container>
-      <Game />
+      <GameEngine framesPerSec={60}>
+        <Game />
+      </GameEngine>
     </Container>
   );
 }
